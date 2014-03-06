@@ -1,7 +1,11 @@
 build/*
+lib/*
 *.class
 
 # Package Files #
 *.jar
 *.war
 *.ear
+
+# Classpath since it hardcodes paths to external jars
+.classpath
