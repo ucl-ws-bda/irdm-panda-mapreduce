@@ -6,15 +6,14 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
-import uk.ac.ucl.panda.mapreduce.io.TermWritable;
 
 public class Indexer {
 
-	public class WordMapper extends Mapper<LongWritable, Text, Text, TermWritable> {
+	public class WordMapper extends Mapper<LongWritable, Text, Text, Text> {
 		
 	}
 	
-	public class SumReducer extends Reducer<Text, TermWritable, Text, PostingWritable> {
+	public class SumReducer extends Reducer<Text, Text, Text, PostingWritable> {
 
 	}
 }
