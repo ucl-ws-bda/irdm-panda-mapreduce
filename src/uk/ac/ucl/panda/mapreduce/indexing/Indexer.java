@@ -29,11 +29,11 @@ public class Indexer {
   private static final String DOCIDFIELDNAME = "docname";
   private static final String TERMVECTORFIELDNAME = "body";
 
-	public class WordMapper extends Mapper<LongWritable, Text, Text, TermWritable> {
+	public class WordMapper extends Mapper<LongWritable, Text, Text, Text> {
 		
 	}
 	
-	public class SumReducer extends Reducer<Text, TermWritable, Text, PostingWritable> {
+	public class SumReducer extends Reducer<Text, Text, Text, PostingWritable> {
 
 	}
 
