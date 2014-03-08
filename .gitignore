@@ -1,9 +1,7 @@
 build/*
-lib/*
 *.class
 
 # Package Files #
-*.jar
 *.war
 *.ear
 
