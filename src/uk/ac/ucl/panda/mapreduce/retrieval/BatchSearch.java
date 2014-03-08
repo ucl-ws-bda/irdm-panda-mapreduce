@@ -13,7 +13,6 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
@@ -53,20 +52,24 @@ public class BatchSearch extends Configured implements Tool {
 	
 	@Override
 	public int run(String[] args) throws Exception {
-		if (args.length != 4) {
+		if (args.length != 5) {
 			logger.error("RTFM.");
 			return -1;
 		}
 
-		String inputPath = args[0];
+		String topicsPath = args[0];
 		String outputPath = args[1];
+		String indexPath = args[2];
 		
 		int reduceTasks = Integer.parseInt(args[3]);	
 		
-		// TODO: custom topic reader
-		// TODO: get the index and model to mapper somehow, preferably on init
-		
+		// TODO: args should be 0: topics dir, 1: output dir, 2:index dir, 3: num reducers, 4: model, 5: max results
 		Job job = Job.getInstance();
+		job.getConfiguration().set("indexDir", indexPath);
+		// TODO: validate model number
+		job.getConfiguration().setInt("model", Integer.parseInt(args[4]));
+		job.getConfiguration().setInt("maxResults", Integer.parseInt(args[5]));
+		
 		Path outputDir = new Path(outputPath);
 		FileSystem.get(outputDir.toUri(), job.getConfiguration()).delete(outputDir, true);
 				
@@ -80,16 +83,15 @@ public class BatchSearch extends Configured implements Tool {
         job.setMapperClass(IndexLookup.class); 
         job.setReducerClass(ResultsByRank.class);  
  
-        job.setInputFormatClass(TextInputFormat.class);
+        job.setInputFormatClass(TopicInputFormat.class);
         job.setOutputFormatClass(SequenceFileOutputFormat.class);
  
-        FileInputFormat.setInputPaths(job, new Path(inputPath));
+        FileInputFormat.setInputPaths(job, new Path(topicsPath));
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
  
         job.setJarByClass(BatchSearch.class);
-		
         job.submit();
-        
+        System.out.println(job.getConfiguration().get("indexDir"));
 		return 0;
 	}
 
