@@ -75,7 +75,9 @@ public class TopicRecordReader extends RecordReader<LongWritable, Text> {
 	public void close() throws IOException {
 		// Could arguably be closed during initialisation unless we expect
 		// to need to re-read the topics file during processing due to errors.
-		br.close();
+		if (br != null) {
+			br.close();
+		}
 	}
 
 }
