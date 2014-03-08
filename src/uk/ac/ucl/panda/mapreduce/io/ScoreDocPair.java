@@ -6,9 +6,9 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 
-public class ScoreDocPair implements Writable {
+public class ScoreDocPair implements WritableComparable<ScoreDocPair> {
 
 	private LongWritable docId;
 	private DoubleWritable score;
@@ -49,5 +49,9 @@ public class ScoreDocPair implements Writable {
 	public void setScore(DoubleWritable score) {
 		this.score = score;
 	}
-
+	
+	@Override
+	public int compareTo(ScoreDocPair other) {
+		return this.score.compareTo(other.score);
+	}
 }
