@@ -39,7 +39,7 @@ public class ModelParser {
     }
    
     
-    ModelParser(int m) {
+    public ModelParser(int m) {
         this.model=m;
         try {
 			algorithm = (models.get(m)).newInstance();
