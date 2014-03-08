@@ -1,6 +1,10 @@
 package uk.ac.ucl.panda.mapreduce.retrieval;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -20,6 +24,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
 
 import uk.ac.ucl.panda.mapreduce.io.ScoreDocPair;
+import uk.ac.ucl.panda.retrieval.models.ModelParser;
 
 public class BatchSearch extends Configured implements Tool {
 
@@ -27,12 +32,32 @@ public class BatchSearch extends Configured implements Tool {
 		private LongWritable topicId = new LongWritable();
 		private ScoreDocPair scoreDoc = new ScoreDocPair();
 
-		// TODO: can model and other stuff be passed on init?
-		
 		@Override
-		public void map(LongWritable topicId, Text query, Context contex) throws IOException,
+		public void map(LongWritable topicId, Text query, Context context) throws IOException,
 				InterruptedException {
-			// TODO: calculate the score based on given model
+			
+			String indexDir = context.getConfiguration().get("indexDir");
+			int modelNum = context.getConfiguration().getInt("model", 2); // BM25
+			ModelParser model = new ModelParser(modelNum);
+			
+			StringTokenizer tokenizer = new StringTokenizer(query.toString());
+			List<String> queryTerms = new ArrayList<String>();
+			while (tokenizer.hasMoreTokens()) {
+				queryTerms.add(tokenizer.nextToken());
+			}
+			
+			// TODO: fetch CL, avgDL, DocNum from index meta
+			// TODO: fetch and initialize model
+			// TODO: get all documents related to query terms
+			// TODO: for each (doc, [matching terms])
+			// 			for each matching term
+			//				compute qTF
+			// 				fetch TF, DF for from index + DL from "forward index"			
+			// 				fetch CTF for from index
+			//				compute idf			
+			// 				calculate the score based on given model
+			//			sum score over all terms
+			//			output scoredocpair
 		}
 	}
 
@@ -40,11 +65,15 @@ public class BatchSearch extends Configured implements Tool {
 
 		private ArrayWritable results = new ArrayWritable(ScoreDocPair.class);
 		
-		// TODO: can max results be set on init?
-		
-		public void reduce(LongWritable topicId, Iterable<ScoreDocPair> topDocs, Context context)
+		public void reduce(LongWritable topicId, Iterable<ScoreDocPair> docs, Context context)
 				throws IOException, InterruptedException {
-			// TODO: not much, should be rank ordered already, maybe trim to only retain top K results
+			int maxResults = context.getConfiguration().getInt("maxResults", 100);
+			List<ScoreDocPair> sortedDocs = new ArrayList<ScoreDocPair>();
+			for (ScoreDocPair doc: docs) { 
+				sortedDocs.add(doc); 
+			}
+			Collections.sort(sortedDocs);
+			results.set(sortedDocs.subList(0, maxResults).toArray(new ScoreDocPair[1]));
 		}
 	}
 
