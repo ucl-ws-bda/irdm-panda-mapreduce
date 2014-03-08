@@ -22,10 +22,10 @@ public class TopicsReaderTest extends TestCase {
 
 	@Test
 	public void testReadTopics() throws IOException, InterruptedException {
-		// DISCLAIMER: untested or compiled
 		Configuration conf = new Configuration(false);
 		conf.set("fs.default.name", "file:///");
 
+		// TODO: this should not be hardcoded.
 		File testFile = new File("/home/ib/irdm/Data/topics.txt");
 		FileSplit split = new FileSplit(
 		       new Path(testFile.toURI()), 0, 
