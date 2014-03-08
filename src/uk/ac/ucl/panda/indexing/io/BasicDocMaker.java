@@ -92,6 +92,13 @@ public abstract class BasicDocMaker implements DocMaker {
    * @exception NoMoreDataException if data is exhausted (and 'forever' set to false).
    */
   protected abstract DocData getNextDocData() throws NoMoreDataException, Exception;
+  protected abstract DocData getDocData(String path) throws UnsupportedEncodingException, Exception;
+
+  public Document makeDocument(String path) throws UnsupportedEncodingException, Exception{
+    DocData docData = getDocData(path);
+    Document doc = createDocument(docData,0,-1);
+    return doc;
+  }
 
   /*
    *  (non-Javadoc)

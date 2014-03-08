@@ -45,6 +45,9 @@ public class TrecDoc extends BasicDocMaker {
     "EEE, dd-MMM-yyy kk:mm:ss z", //Tue, 09 Dec 2003 22:39:08 GMT
   };
 
+  public TrecDoc() {
+  }
+
     public TrecDoc(String data) {
         dataDir = new File(data);
     }
@@ -60,6 +63,14 @@ public class TrecDoc extends BasicDocMaker {
       throw new RuntimeException("No txt files in dataDir: "+dataDir.getAbsolutePath());
     }
  }
+
+  private void openFile(File file) {
+    try {
+      reader = FileReader.openFileReader(file);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
   private void openNextFile() throws NoMoreDataException, Exception {
     closeInputs();
@@ -140,6 +151,27 @@ public class TrecDoc extends BasicDocMaker {
     return sb;
   }
   
+  protected DocData getDocData(String path) throws Exception {
+    if (reader == null) {
+      openFile(new File(path));
+    }
+    StringBuffer sb = read("<DOC>", null, false, false);
+    if (sb == null)
+      return null;
+    // 2. name
+    sb = read("<DOCNO>", null, true, false);
+    String name = sb.substring("<DOCNO>".length());
+    name = name.substring(0, name.indexOf("</DOCNO>")).trim();
+    sb = read("</DOC>", null, false, true);
+    // this is the next document, so parse it
+    Date date = new Date();
+    HTMLParser p = getHtmlParser();
+    DocData docData = p.parse(name, date, sb, getDateFormat(0));
+    addBytes(sb.length()); // count char length of parsed html text (larger than
+                           // the plain doc body text).
+    return docData;
+  }
+
   protected synchronized DocData getNextDocData() throws NoMoreDataException, Exception {
     if (reader==null) {
       openNextFile();
