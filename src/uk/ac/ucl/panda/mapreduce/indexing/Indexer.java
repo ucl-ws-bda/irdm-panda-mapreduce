@@ -18,7 +18,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import uk.ac.ucl.panda.applications.demo.DemoHTMLParser;
 import uk.ac.ucl.panda.indexing.io.TrecDoc;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
-import uk.ac.ucl.panda.mapreduce.io.TermWritable;
 import uk.ac.ucl.panda.utility.io.Config;
 import uk.ac.ucl.panda.utility.parser.HTMLParser;
 import uk.ac.ucl.panda.utility.structure.Document;
