@@ -1,4 +1,4 @@
-package uk.ac.ucl.panda.mapreduce.indexing;
+package uk.ac.ucl.panda.mapreduce.io;
 
 import java.io.DataInput;
 import java.io.DataOutput;
