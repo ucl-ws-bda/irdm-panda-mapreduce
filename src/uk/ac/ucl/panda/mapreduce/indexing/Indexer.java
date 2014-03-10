@@ -29,7 +29,7 @@ public class Indexer {
   private static final String DOCIDFIELDNAME = "docname";
   private static final String TERMVECTORFIELDNAME = "body";
 
-	public class WordMapper extends Mapper<Text, Text, Text, PairOfTextInt> {
+	public class WordMapper extends Mapper<Text, Text, Text, PairOfStringInt> {
 	    private final static Text WORD = new Text();
 	    private final static ObjectFrequencyDistribution<String> DISTRIBUTION =
 			new ObjectFrequencyDistribution<String>();
@@ -49,7 +49,7 @@ public class Indexer {
 	          for (Pair<String, Integer> posting : DISTRIBUTION) {
 	            WORD.set(posting.getLeftElement());
 	            context.write(WORD,
-	                new PairOfTextInt(key, posting.getRightElement()));
+	                new PairOfStringInt(key.toString(), posting.getRightElement()));
 	          }
 	        }
 	}

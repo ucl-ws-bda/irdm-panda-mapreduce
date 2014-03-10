@@ -8,13 +8,13 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
-public class PairOfTextInt implements Writable {
+public class PairOfStringInt implements Writable {
 
 	private Text leftElement;
 	private IntWritable rightElement;
 
-	public PairOfTextInt(Text left, Integer right) {
-		leftElement = left;
+	public PairOfStringInt(String left, Integer right) {
+		leftElement.set(left);
 		rightElement.set(right);
 	}
 
