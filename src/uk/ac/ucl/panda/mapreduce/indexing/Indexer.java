@@ -5,7 +5,6 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -18,8 +17,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import uk.ac.ucl.panda.applications.demo.DemoHTMLParser;
 import uk.ac.ucl.panda.indexing.io.TrecDoc;
+import uk.ac.ucl.panda.mapreduce.indexing.Indexer.PandaRecordReader;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
-import uk.ac.ucl.panda.mapreduce.io.ScoreDocPair;
 import uk.ac.ucl.panda.utility.io.Config;
 import uk.ac.ucl.panda.utility.parser.HTMLParser;
 import uk.ac.ucl.panda.utility.structure.Document;
@@ -30,12 +29,12 @@ public class Indexer {
   private static final String DOCIDFIELDNAME = "docname";
   private static final String TERMVECTORFIELDNAME = "body";
 
-	public class WordMapper extends Mapper<LongWritable, Text, Text, ScoreDocPair> {
+	public class WordMapper extends Mapper<Text, Text, Text, PairOfTextInt> {
 	    private final static Text WORD = new Text();
 	    private final static ObjectFrequencyDistribution<String> DISTRIBUTION =
 			new ObjectFrequencyDistribution<String>();
 
-	    public void map(LongWritable key, Text value, Context context)
+	    public void map(Text key, Text value, Context context)
 	            throws IOException, InterruptedException {
 	          String doc = value.toString();
 	          StringTokenizer terms = new StringTokenizer(doc);
@@ -50,7 +49,7 @@ public class Indexer {
 	          for (Pair<String, Integer> posting : DISTRIBUTION) {
 	            WORD.set(posting.getLeftElement());
 	            context.write(WORD,
-	                new ScoreDocPair((int) key.get(), posting.getRightElement()));
+	                new PairOfTextInt(key, posting.getRightElement()));
 	          }
 	        }
 	}

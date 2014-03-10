@@ -39,7 +39,7 @@ public class ObjectFrequencyDistribution<T> implements
 			public Pair<T, Integer> next() {
 				T key = backendIterator.next();
 				Integer value = backend.get(key);
-				return new Pair(key, value);
+				return new Pair<T, Integer>(key, value);
 			}
 
 			@Override
