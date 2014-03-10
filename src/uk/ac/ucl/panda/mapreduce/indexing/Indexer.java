@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.RecordReader;
@@ -15,10 +19,13 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 
 import uk.ac.ucl.panda.applications.demo.DemoHTMLParser;
 import uk.ac.ucl.panda.indexing.io.TrecDoc;
-import uk.ac.ucl.panda.mapreduce.indexing.Indexer.PandaRecordReader;
 import uk.ac.ucl.panda.mapreduce.io.ArrayListWritable;
 import uk.ac.ucl.panda.mapreduce.io.PairOfStringInt;
 import uk.ac.ucl.panda.mapreduce.io.PairOfWritables;
@@ -27,14 +34,14 @@ import uk.ac.ucl.panda.utility.parser.HTMLParser;
 import uk.ac.ucl.panda.utility.structure.Document;
 import uk.ac.ucl.panda.utility.structure.Field;
 
-public class Indexer {
+public class Indexer extends Configured implements Tool {
 
 	private static final String DOCIDFIELDNAME = "docname";
 	private static final String TERMVECTORFIELDNAME = "body";
 
 	public class WordMapper extends Mapper<Text, Text, Text, PairOfStringInt> {
-		private final static Text WORD = new Text();
-		private final static ObjectFrequencyDistribution<String> DISTRIBUTION = new ObjectFrequencyDistribution<String>();
+		private final Text WORD = new Text();
+		private final ObjectFrequencyDistribution<String> DISTRIBUTION = new ObjectFrequencyDistribution<String>();
 
 		public void map(Text key, Text value, Context context)
 				throws IOException, InterruptedException {
@@ -61,7 +68,7 @@ public class Indexer {
 	public class SumReducer
 			extends
 			Reducer<Text, PairOfStringInt, Text, PairOfWritables<IntWritable, ArrayListWritable<PairOfStringInt>>> {
-		private final static IntWritable DF = new IntWritable();
+		private final IntWritable DF = new IntWritable();
 
 		public void reduce(Text key, Iterable<PairOfStringInt> values,
 				Context context) throws IOException, InterruptedException {
@@ -176,5 +183,38 @@ public class Indexer {
 			return true;
 		}
 
+	}
+
+	@Override
+	public int run(String[] args) throws Exception {
+		Path in = new Path(args[0]);
+		Path out = new Path(args[1]);
+
+		Job job = new Job(getConf());
+		job.setInputFormatClass(PandaInputFormat.class);
+
+		PandaInputFormat.setInputPaths(job, in);
+		FileOutputFormat.setOutputPath(job, out);
+
+		job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+		job.setMapOutputKeyClass(Text.class);
+		job.setMapOutputValueClass(PairOfStringInt.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(PairOfWritables.class);
+
+		job.setMapperClass(WordMapper.class);
+		job.setReducerClass(SumReducer.class);
+
+		FileSystem.get(out.toUri(), job.getConfiguration()).delete(out, true);
+
+		job.waitForCompletion(true);
+		return 0;
+	}
+
+	public static void main(String[] args) throws Exception {
+		int res = ToolRunner.run(new Configuration(), new Indexer(),
+				args);
+		System.exit(res);
 	}
 }
