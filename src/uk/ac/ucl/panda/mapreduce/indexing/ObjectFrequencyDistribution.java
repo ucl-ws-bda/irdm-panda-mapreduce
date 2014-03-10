@@ -3,8 +3,6 @@ package uk.ac.ucl.panda.mapreduce.indexing;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 public class ObjectFrequencyDistribution<T> implements
 		Iterable<Pair<T, Integer>> {
 	HashMap<T, Integer> backend;
