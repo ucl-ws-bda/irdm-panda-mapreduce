@@ -2,6 +2,7 @@ package uk.ac.ucl.panda.mapreduce.indexing;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -18,6 +19,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import uk.ac.ucl.panda.applications.demo.DemoHTMLParser;
 import uk.ac.ucl.panda.indexing.io.TrecDoc;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
+import uk.ac.ucl.panda.mapreduce.io.ScoreDocPair;
 import uk.ac.ucl.panda.utility.io.Config;
 import uk.ac.ucl.panda.utility.parser.HTMLParser;
 import uk.ac.ucl.panda.utility.structure.Document;
@@ -28,8 +30,29 @@ public class Indexer {
   private static final String DOCIDFIELDNAME = "docname";
   private static final String TERMVECTORFIELDNAME = "body";
 
-	public class WordMapper extends Mapper<LongWritable, Text, Text, Text> {
-		
+	public class WordMapper extends Mapper<LongWritable, Text, Text, ScoreDocPair> {
+	    private final static Text WORD = new Text();
+	    private final static ObjectFrequencyDistribution<String> DISTRIBUTION =
+			new ObjectFrequencyDistribution<String>();
+
+	    public void map(LongWritable key, Text value, Context context)
+	            throws IOException, InterruptedException {
+	          String doc = value.toString();
+	          StringTokenizer terms = new StringTokenizer(doc);
+	          DISTRIBUTION.clear();
+
+	          // get tf
+	          while (terms.hasMoreTokens()) {
+	            DISTRIBUTION.increment(terms.nextToken());
+	          }
+
+	          // emit word and posting
+	          for (Pair<String, Integer> posting : DISTRIBUTION) {
+	            WORD.set(posting.getLeftElement());
+	            context.write(WORD,
+	                new ScoreDocPair((int) key.get(), posting.getRightElement()));
+	          }
+	        }
 	}
 	
 	public class SumReducer extends Reducer<Text, Text, Text, PostingWritable> {
