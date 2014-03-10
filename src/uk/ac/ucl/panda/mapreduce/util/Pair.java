@@ -1,4 +1,4 @@
-package uk.ac.ucl.panda.mapreduce.indexing;
+package uk.ac.ucl.panda.mapreduce.util;
 
 public class Pair<T1, T2> {
 

@@ -29,6 +29,8 @@ import uk.ac.ucl.panda.indexing.io.TrecDoc;
 import uk.ac.ucl.panda.mapreduce.io.ArrayListWritable;
 import uk.ac.ucl.panda.mapreduce.io.PairOfStringInt;
 import uk.ac.ucl.panda.mapreduce.io.PairOfWritables;
+import uk.ac.ucl.panda.mapreduce.util.ObjectFrequencyDistribution;
+import uk.ac.ucl.panda.mapreduce.util.Pair;
 import uk.ac.ucl.panda.utility.io.Config;
 import uk.ac.ucl.panda.utility.parser.HTMLParser;
 import uk.ac.ucl.panda.utility.structure.Document;

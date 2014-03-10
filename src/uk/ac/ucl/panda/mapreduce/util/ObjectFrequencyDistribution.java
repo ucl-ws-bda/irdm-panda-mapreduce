@@ -1,4 +1,4 @@
-package uk.ac.ucl.panda.mapreduce.indexing;
+package uk.ac.ucl.panda.mapreduce.util;
 
 import java.util.HashMap;
 import java.util.Iterator;
