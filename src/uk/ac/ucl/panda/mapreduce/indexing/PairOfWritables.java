@@ -6,7 +6,8 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
 
-public class PairOfWritables<T1 extends Writable, T2 extends Writable> implements Writable {
+public class PairOfWritables<T1 extends Writable, T2 extends Writable>
+		implements Writable {
 
 	private Writable leftElement;
 	private Writable rightElement;
