@@ -64,7 +64,7 @@ public class IndexStoreAndRetrieveTests extends TestCase {
 	
 	@Test
 	public void testStoreAndRetrievePosting() throws IOException {
-		Index.writeIndex(index, File.createTempFile("index", "test", testDirectory));
+		Index.writeIndex(index, testDirectory);
 		Map<Text, PostingWritable> fetchedIndex = Index.readIndex(testDirectory);
 		
 		for (Text key: index.keySet()) {
@@ -72,6 +72,38 @@ public class IndexStoreAndRetrieveTests extends TestCase {
 			assertTrue(fetchedIndex.containsKey(key));
 			
 			PostingWritable b = fetchedIndex.get(key);
+			
+			assertEquals(a.getCollectionTermFrequency(), b.getCollectionTermFrequency());
+			assertEquals(a.getDocumentFrequency(), b.getDocumentFrequency());
+			
+			MapWritable aObs = a.getObservations();
+			MapWritable bObs = b.getObservations();
+			for (Writable docId: aObs.keySet()) {				
+				assertTrue(bObs.containsKey(docId));
+				
+				FrequencyLocationsPair ap = (FrequencyLocationsPair)aObs.get(docId);
+				FrequencyLocationsPair bp = (FrequencyLocationsPair)aObs.get(docId);
+				
+				assertEquals(ap.getTermFrequency(), bp.getTermFrequency());
+				
+				Set<String> aLocs = new HashSet<String>();
+				Collections.addAll(aLocs, ap.getLocations().toStrings());
+				Set<String> bLocs = new HashSet<String>();
+				Collections.addAll(bLocs, bp.getLocations().toStrings());
+				assertTrue(aLocs.containsAll(bLocs));
+				assertTrue(bLocs.containsAll(aLocs));
+			}
+		}
+	}
+	
+	@Test
+	public void testStoreAndRetrievePostingOneByOne() throws IOException {
+		Index.writeIndex(index, testDirectory);
+		
+		for (Text key: index.keySet()) {
+			PostingWritable a = index.get(key);
+			
+			PostingWritable b = Index.fetchPosting(testDirectory.getAbsolutePath(), key.toString());
 			
 			assertEquals(a.getCollectionTermFrequency(), b.getCollectionTermFrequency());
 			assertEquals(a.getDocumentFrequency(), b.getDocumentFrequency());
