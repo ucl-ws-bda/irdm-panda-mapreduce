@@ -5,6 +5,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -54,8 +55,27 @@ public class Indexer {
 	        }
 	}
 	
-	public class SumReducer extends Reducer<Text, Text, Text, PostingWritable> {
+	public class SumReducer extends Reducer<Text, PairOfStringInt, Text, PairOfWritables<IntWritable, ArrayListWritable<PairOfStringInt>>> {
+		private final static IntWritable DF = new IntWritable();
 
+	    public void reduce(Text key, Iterable<PairOfStringInt> values, Context context)
+	        throws IOException, InterruptedException {
+	      ArrayListWritable<PairOfStringInt> postings = new ArrayListWritable<PairOfStringInt>();
+
+	      // get df
+	      int df = 0;
+	      for (PairOfStringInt posting : values) {
+			//TODO: is clone() necessary here?
+	        postings.add(posting);
+	        df++;
+	      }
+	      DF.set(df);
+
+	      // emit word, df, and postings
+	      context.write(key,
+	          new PairOfWritables<IntWritable, ArrayListWritable<PairOfStringInt>>(DF,
+	              postings));
+	    }
 	}
 
 	public class PandaInputFormat extends FileInputFormat<Text, Text>  {
