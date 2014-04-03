@@ -68,7 +68,9 @@ public class Indexer extends Configured implements Tool {
 		}
 	}
 
+
 	public static class SumReducer	extends	Reducer<Text, PairOfStringInt, Text, PairOfWritables<IntWritable, ArrayListWritable<PairOfStringInt>>> {
+
 		private final IntWritable DF = new IntWritable();
 		
 		public void reduce(Text key, Iterable<PairOfStringInt> values,
@@ -91,7 +93,7 @@ public class Indexer extends Configured implements Tool {
 							DF, postings));
 		}
 	}
-	
+
 	public static class PandaInputFormat extends FileInputFormat<Text, Text> {
 
 		@Override
@@ -107,7 +109,7 @@ public class Indexer extends Configured implements Tool {
 		}
 
 	}
-	
+
 	public static class PandaRecordReader extends RecordReader<Text, Text> {
 
 		TrecDoc td;
