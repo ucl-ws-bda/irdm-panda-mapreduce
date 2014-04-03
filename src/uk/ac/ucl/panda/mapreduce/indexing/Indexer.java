@@ -29,6 +29,7 @@ import org.apache.hadoop.util.ToolRunner;
 import uk.ac.ucl.panda.applications.demo.DemoHTMLParser;
 import uk.ac.ucl.panda.indexing.io.TrecDoc;
 import uk.ac.ucl.panda.mapreduce.io.ArrayListWritable;
+import uk.ac.ucl.panda.mapreduce.io.Index;
 import uk.ac.ucl.panda.mapreduce.io.PairOfStringInt;
 import uk.ac.ucl.panda.mapreduce.io.PairOfWritables;
 import uk.ac.ucl.panda.mapreduce.util.ObjectFrequencyDistribution;
@@ -215,8 +216,11 @@ public class Indexer extends Configured implements Tool {
 
 		job.waitForCompletion(true);
 		
-		System.out.println("Documents processed: " + job.getCounters().findCounter(IndexMeta.NumberOfDocuments).getValue());
-		System.out.println("Collection length: " + job.getCounters().findCounter(IndexMeta.CollectionLength).getValue());
+		long numberOfDocuments = job.getCounters().findCounter(IndexMeta.NumberOfDocuments).getValue();
+		long collectionLength = job.getCounters().findCounter(IndexMeta.CollectionLength).getValue();
+		Index.writeMetaIndex(collectionLength, numberOfDocuments, out);
+		System.out.println("Documents processed: " + numberOfDocuments);
+		System.out.println("Collection length: " + collectionLength);
 		return 0;
 	}
 

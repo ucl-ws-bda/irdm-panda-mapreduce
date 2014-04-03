@@ -92,4 +92,17 @@ public class Index {
 		reader.close();
 		return metaIndex;
 	}
+	
+	public static void writeMetaIndex(long collectionLength, long numberOfDocuments, Path out) throws IOException {
+		Configuration conf = new Configuration();
+		Path p = new Path(out, metaFile);
+		MapFile.Writer writer = new MapFile.Writer(conf, p, 
+				MapFile.Writer.keyClass(Text.class),
+				MapFile.Writer.valueClass(LongWritable.class)
+	    );
+		
+		writer.append(new Text("CollectionLength"), new LongWritable(collectionLength));
+		writer.append(new Text("NumberOfDocuments"), new LongWritable(numberOfDocuments));
+		writer.close();
+	}
 }
