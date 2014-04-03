@@ -22,6 +22,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -57,6 +58,7 @@ public class Indexer extends Configured implements Tool {
 				DISTRIBUTION.increment(terms.nextToken());
 			}
 
+			int numTerms = 0;
 			// emit word and posting
 			for (Pair<String, Integer> posting : DISTRIBUTION) {
 				WORD.set(posting.getLeftElement());
@@ -64,7 +66,10 @@ public class Indexer extends Configured implements Tool {
 						WORD,
 						new PairOfStringInt(key.toString(), posting
 								.getRightElement()));
-			}
+				numTerms += posting.getRightElement();
+			}			
+			context.getCounter(IndexMeta.CollectionLength).increment(numTerms);
+			context.getCounter(IndexMeta.NumberOfDocuments).increment(1);
 		}
 	}
 
@@ -193,7 +198,8 @@ public class Indexer extends Configured implements Tool {
 		PandaInputFormat.setInputPaths(job, in);
 		FileOutputFormat.setOutputPath(job, out);
 
-		job.setOutputFormatClass(SequenceFileOutputFormat.class);
+		//job.setOutputFormatClass(SequenceFileOutputFormat.class);
+		job.setOutputFormatClass(TextOutputFormat.class);
 
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(PairOfStringInt.class);
@@ -208,6 +214,9 @@ public class Indexer extends Configured implements Tool {
 		FileSystem.get(out.toUri(), job.getConfiguration()).delete(out, true);
 
 		job.waitForCompletion(true);
+		
+		System.out.println("Documents processed: " + job.getCounters().findCounter(IndexMeta.NumberOfDocuments).getValue());
+		System.out.println("Collection length: " + job.getCounters().findCounter(IndexMeta.CollectionLength).getValue());
 		return 0;
 	}
 
