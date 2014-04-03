@@ -111,7 +111,7 @@ public class BatchSearch extends Configured implements Tool {
 	
 	@Override
 	public int run(String[] args) throws Exception {
-		if (args.length != 5) {
+		if (args.length != 6) {
 			logger.error("RTFM.");
 			return -1;
 		}
@@ -149,7 +149,7 @@ public class BatchSearch extends Configured implements Tool {
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
  
         job.setJarByClass(BatchSearch.class);
-        job.submit();
+        job.waitForCompletion(true);
         System.out.println(job.getConfiguration().get("indexDir"));
 		return 0;
 	}
