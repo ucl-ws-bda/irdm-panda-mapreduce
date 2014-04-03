@@ -41,7 +41,7 @@ public class Indexer extends Configured implements Tool {
 	private static final String DOCIDFIELDNAME = "docname";
 	private static final String TERMVECTORFIELDNAME = "body";
 
-	public class WordMapper extends Mapper<Text, Text, Text, PairOfStringInt> {
+	public static class WordMapper extends Mapper<Text, Text, Text, PairOfStringInt> {
 		private final Text WORD = new Text();
 		private final ObjectFrequencyDistribution<String> DISTRIBUTION = new ObjectFrequencyDistribution<String>();
 
@@ -67,7 +67,7 @@ public class Indexer extends Configured implements Tool {
 		}
 	}
 
-	public class SumReducer
+	public static class SumReducer
 			extends
 			Reducer<Text, PairOfStringInt, Text, PairOfWritables<IntWritable, ArrayListWritable<PairOfStringInt>>> {
 		private final IntWritable DF = new IntWritable();
@@ -93,7 +93,7 @@ public class Indexer extends Configured implements Tool {
 		}
 	}
 
-	public class PandaInputFormat extends FileInputFormat<Text, Text> {
+	public static class PandaInputFormat extends FileInputFormat<Text, Text> {
 
 		@Override
 		protected boolean isSplitable(JobContext context, Path filename) {
@@ -109,7 +109,7 @@ public class Indexer extends Configured implements Tool {
 
 	}
 
-	public class PandaRecordReader extends RecordReader<Text, Text> {
+	public static class PandaRecordReader extends RecordReader<Text, Text> {
 
 		TrecDoc td;
 		Text key;
