@@ -16,8 +16,11 @@ public class ObjectFrequencyDistribution<T> implements
 	}
 
 	public void increment(T key) {
-		Integer currentValue = backend.get(key);
-		Integer newValue = new Integer(currentValue.intValue() + 1);
+		int currentValue = 0;
+		if (backend.containsKey(key)) {
+			currentValue = backend.get(key).intValue();
+		}		
+		Integer newValue = new Integer(currentValue + 1);
 		backend.put(key, newValue);
 	}
 
