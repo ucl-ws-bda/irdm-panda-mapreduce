@@ -1,5 +1,7 @@
 package uk.ac.ucl.panda.indexing.io;
 
+import java.io.IOException;
+
 import uk.ac.ucl.panda.utility.structure.Document;
 import uk.ac.ucl.panda.indexing.*;
 import uk.ac.ucl.panda.utility.io.Config;
@@ -43,8 +45,9 @@ public interface DocMaker {
   /** Create the next document. */
   public Document makeDocument () throws Exception;
 
-  /** Set the properties */
-  public void setConfig (Config config);
+  /** Set the properties 
+ * @throws IOException */
+  public void setConfig (Config config) throws IOException;
   
   /** Reset inputs so that the test run would behave, input wise, as if it just started. */
   public void resetInputs();

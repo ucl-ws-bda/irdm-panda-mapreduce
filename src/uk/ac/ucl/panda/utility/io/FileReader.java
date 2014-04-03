@@ -18,6 +18,10 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+
 /**
  *
  * @author xxms
@@ -65,11 +69,15 @@ public class FileReader {
 	  */
 	public static BufferedReader openFileReader(String filename, String charset) throws IOException
 	{
+		FileSystem fs = FileSystem.get(new Configuration());
+		Path p = new Path(filename);
+		InputStream in = fs.open(p);
+		
 		BufferedReader rtr = null;
 		if (filename.toLowerCase().endsWith("zip")) {
-                    ZipInputStream in = new ZipInputStream(new FileInputStream(filename));
+                    ZipInputStream zin = new ZipInputStream(in);
                      // Get the first entry
-		        ZipEntry entry = in.getNextEntry();
+		        ZipEntry entry = zin.getNextEntry();
                     rtr = new BufferedReader(
 				 charset == null				
 				? new InputStreamReader(in)
@@ -79,23 +87,23 @@ public class FileReader {
                 else if (filename.toLowerCase().endsWith("gz")) {
 			rtr = new BufferedReader(
 				 charset == null				
-				? new InputStreamReader(new GZIPInputStream(new FileInputStream(filename)))
-				: new InputStreamReader(new GZIPInputStream(new FileInputStream(filename)), charset)
+				? new InputStreamReader(new GZIPInputStream(in))
+				: new InputStreamReader(new GZIPInputStream(in), charset)
 			);
 		} 
 		else if (filename.toLowerCase().endsWith("z")){
 			rtr = new BufferedReader(
 					 charset == null				
-					? new InputStreamReader(new ZcompressInputStream(new FileInputStream(filename)))
-					: new InputStreamReader(new ZcompressInputStream(new FileInputStream(filename)), charset)
+					? new InputStreamReader(new ZcompressInputStream(in))
+					: new InputStreamReader(new ZcompressInputStream(in), charset)
 				);
 			
 		}
 		else {
 			rtr = new BufferedReader(
 				charset == null 
-					? new InputStreamReader(new FileInputStream(filename))// new FileReader(filename)
-					: new InputStreamReader(new FileInputStream(filename), charset)
+					? new InputStreamReader(in)// new FileReader(filename)
+					: new InputStreamReader(in, charset)
 				);
 		}
 		return rtr;

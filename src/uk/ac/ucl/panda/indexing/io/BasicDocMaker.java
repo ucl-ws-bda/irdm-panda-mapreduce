@@ -21,10 +21,20 @@ package uk.ac.ucl.panda.indexing.io;
 
 import uk.ac.ucl.panda.indexing.*;
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocatedFileStatus;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.RemoteIterator;
+
 import uk.ac.ucl.panda.utility.io.Config;
 import uk.ac.ucl.panda.utility.io.Format;
 import uk.ac.ucl.panda.utility.io.NoMoreDataException;
@@ -205,7 +215,7 @@ public abstract class BasicDocMaker implements DocMaker {
   /* (non-Javadoc)
    * @see DocMaker#setConfig(java.util.Properties)
    */
-  public void setConfig(Config config) {
+  public void setConfig(Config config) throws IOException {
     this.config = config;
     boolean stored = config.get("doc.stored",false); 
     boolean tokenized = config.get("doc.tokenized",true);
@@ -309,23 +319,30 @@ public abstract class BasicDocMaker implements DocMaker {
     }
   }
 
-  protected void collectFiles(File f, ArrayList inputFiles) {
+  protected void collectFiles(String path, ArrayList inputFiles) throws IOException {
+	  
+	Path p = new Path(path);
+	FileSystem fs = FileSystem.get(new Configuration());
     //System.out.println("Collect: "+f.getAbsolutePath());
-    if (!f.canRead()) {
+    if (!fs.exists(p)) {
       return;
     }
-    if (f.isDirectory()) {
-      String files[] = f.list();
-      Arrays.sort(files);
-      for (int i = 0; i < files.length; i++) {
-        collectFiles(new File(f,files[i]),inputFiles);
+    if (fs.isDirectory(p)) {
+      RemoteIterator<LocatedFileStatus> fileIter = fs.listFiles(p, false);
+      List<String> files = new ArrayList<String>();
+      while(fileIter.hasNext()) {
+    	  files.add(fileIter.next().getPath().toString());
+      }
+      Collections.sort(files);
+      for (String f: files) {
+        collectFiles(f,inputFiles);
       }
       return;
     }
     //////////////ucl
-    if(f.getName().toLowerCase().endsWith("z")){
-    	inputFiles.add(f);
-    	addUniqueBytes(f.length());
+    if(path.toLowerCase().endsWith("z")){
+    	inputFiles.add(path);
+    	addUniqueBytes(fs.getFileStatus(p).getLen());
     }
   }
 

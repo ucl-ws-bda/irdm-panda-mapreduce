@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,7 +33,7 @@ public class TrecDoc extends BasicDocMaker {
   private static final String newline = System.getProperty("line.separator");
   
   private ThreadLocal dateFormat = new ThreadLocal();
-  private File dataDir = null;
+  private String dataDir = null;
   private ArrayList inputFiles = new ArrayList();
   private int nextFile = 0;
   private int iteration=0;
@@ -49,24 +50,24 @@ public class TrecDoc extends BasicDocMaker {
   }
 
     public TrecDoc(String data) {
-        dataDir = new File(data);
+        dataDir = data;
     }
   
   /* (non-Javadoc)
    * @see SimpleDocMaker#setConfig(java.util.Properties)
    */
-  public void setConfig(Config config) {
+  public void setConfig(Config config) throws IOException {
     super.setConfig(config);
   
-    collectFiles(dataDir,inputFiles);
+    collectFiles(dataDir, inputFiles);
     if (inputFiles.size()==0) {
-      throw new RuntimeException("No txt files in dataDir: "+dataDir.getAbsolutePath());
+      throw new RuntimeException("No txt files in dataDir: " + dataDir);
     }
  }
 
-  private void openFile(File file) {
+  private void openFile(String path) {
     try {
-      reader = FileReader.openFileReader(file);
+      reader = FileReader.openFileReader(path);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -78,7 +79,7 @@ public class TrecDoc extends BasicDocMaker {
     while (true) {
       File f = null;
       synchronized (this) {
-        if (nextFile >= inputFiles.size()) { 
+        if (nextFile >= inputFiles.size() - 1) { 
           // exhausted files, start a new round, unless forever set to false.
           if (!forever) {
         	  //////////////
@@ -150,10 +151,10 @@ public class TrecDoc extends BasicDocMaker {
     //System.out.println("read: "+sb);
     return sb;
   }
-  
+
   protected DocData getDocData(String path) throws Exception {
     if (reader == null) {
-      openFile(new File(path));
+      openFile(path);
     }
     StringBuffer sb = read("<DOC>", null, false, false);
     if (sb == null)
