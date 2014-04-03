@@ -17,8 +17,8 @@ import org.apache.hadoop.io.Text;
 
 public class Index {
 	
-	public static final String metaFile = "meta-index"; 
-	public static final String docIndexDir = "doc-index";
+	public static final String metaFile = "metaIndex"; 
+	public static final String docIndexDir = "docIndex";
 	public static final String indexDir = "index";
 	
 	public static Map<Text, PostingWritable> readIndex(File directory) throws IOException {

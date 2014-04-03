@@ -10,6 +10,7 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
@@ -21,6 +22,8 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
@@ -48,6 +51,12 @@ public class Indexer extends Configured implements Tool {
 		private final Text WORD = new Text();
 		private final ObjectFrequencyDistribution<String> DISTRIBUTION = new ObjectFrequencyDistribution<String>();
 
+		private MultipleOutputs<Text, LongWritable> mos;
+		
+		public void setup(Context context) {
+		 		mos = new MultipleOutputs(context);
+		}
+		 
 		public void map(Text key, Text value, Context context)
 				throws IOException, InterruptedException {
 			String doc = value.toString();
@@ -59,7 +68,7 @@ public class Indexer extends Configured implements Tool {
 				DISTRIBUTION.increment(terms.nextToken());
 			}
 
-			int numTerms = 0;
+			long numTerms = 0;
 			// emit word and posting
 			for (Pair<String, Integer> posting : DISTRIBUTION) {
 				WORD.set(posting.getLeftElement());
@@ -71,14 +80,19 @@ public class Indexer extends Configured implements Tool {
 			}			
 			context.getCounter(IndexMeta.CollectionLength).increment(numTerms);
 			context.getCounter(IndexMeta.NumberOfDocuments).increment(1);
-		}
+			mos.write(Index.docIndexDir, key, new LongWritable(numTerms));
+		}		
+		
+		public void cleanup(Context context) throws IOException, InterruptedException {
+			mos.close();
+        }
 	}
 
 
 	public static class SumReducer	extends	Reducer<Text, PairOfStringInt, Text, PairOfWritables<IntWritable, ArrayListWritable<PairOfStringInt>>> {
 
 		private final IntWritable DF = new IntWritable();
-		
+			
 		public void reduce(Text key, Iterable<PairOfStringInt> values,
 				Context context) throws IOException, InterruptedException {
 			ArrayListWritable<PairOfStringInt> postings = new ArrayListWritable<PairOfStringInt>();
@@ -91,8 +105,9 @@ public class Indexer extends Configured implements Tool {
 				df++;
 			}
 			DF.set(df);
-		
+			
 			// emit word, df, and postings
+			//context.write(
 			context.write(
 					key,
 					new PairOfWritables<IntWritable, ArrayListWritable<PairOfStringInt>>(
@@ -199,17 +214,22 @@ public class Indexer extends Configured implements Tool {
 		PandaInputFormat.setInputPaths(job, in);
 		FileOutputFormat.setOutputPath(job, out);
 
-		//job.setOutputFormatClass(SequenceFileOutputFormat.class);
-		job.setOutputFormatClass(TextOutputFormat.class);
-
+		job.setOutputFormatClass(MapFileOutputFormat.class);
+		//job.setOutputFormatClass(TextOutputFormat.class);
+		
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(PairOfStringInt.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(PairOfWritables.class);
-
+		
 		job.setMapperClass(WordMapper.class);
 		job.setReducerClass(SumReducer.class);
 
+		// Output in SequenceFile since docIds arrive out of order which is required
+		// for MapFiles. We will post-process merge these into a MapFile after indexing.
+		MultipleOutputs.addNamedOutput(job, Index.docIndexDir, SequenceFileOutputFormat.class,
+									   Text.class, LongWritable.class);
+		
 		job.setJarByClass(Indexer.class);
 		
 		FileSystem.get(out.toUri(), job.getConfiguration()).delete(out, true);
