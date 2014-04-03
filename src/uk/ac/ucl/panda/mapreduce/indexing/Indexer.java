@@ -1,5 +1,6 @@
 package uk.ac.ucl.panda.mapreduce.indexing;
 
+
 import java.io.IOException;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -38,10 +39,10 @@ import uk.ac.ucl.panda.utility.structure.Field;
 
 public class Indexer extends Configured implements Tool {
 
-	private static final String DOCIDFIELDNAME = "docname";
-	private static final String TERMVECTORFIELDNAME = "body";
+	static final String DOCIDFIELDNAME = "docname";
+	static final String TERMVECTORFIELDNAME = "body";
 
-	public class WordMapper extends Mapper<Text, Text, Text, PairOfStringInt> {
+	public static class WordMapper extends Mapper<Text, Text, Text, PairOfStringInt> {
 		private final Text WORD = new Text();
 		private final ObjectFrequencyDistribution<String> DISTRIBUTION = new ObjectFrequencyDistribution<String>();
 
@@ -67,15 +68,13 @@ public class Indexer extends Configured implements Tool {
 		}
 	}
 
-	public class SumReducer
-			extends
-			Reducer<Text, PairOfStringInt, Text, PairOfWritables<IntWritable, ArrayListWritable<PairOfStringInt>>> {
+	public static class SumReducer	extends	Reducer<Text, PairOfStringInt, Text, PairOfWritables<IntWritable, ArrayListWritable<PairOfStringInt>>> {
 		private final IntWritable DF = new IntWritable();
-
+		
 		public void reduce(Text key, Iterable<PairOfStringInt> values,
 				Context context) throws IOException, InterruptedException {
 			ArrayListWritable<PairOfStringInt> postings = new ArrayListWritable<PairOfStringInt>();
-
+		
 			// get df
 			int df = 0;
 			for (PairOfStringInt posting : values) {
@@ -84,7 +83,7 @@ public class Indexer extends Configured implements Tool {
 				df++;
 			}
 			DF.set(df);
-
+		
 			// emit word, df, and postings
 			context.write(
 					key,
@@ -92,8 +91,8 @@ public class Indexer extends Configured implements Tool {
 							DF, postings));
 		}
 	}
-
-	public class PandaInputFormat extends FileInputFormat<Text, Text> {
+	
+	public static class PandaInputFormat extends FileInputFormat<Text, Text> {
 
 		@Override
 		protected boolean isSplitable(JobContext context, Path filename) {
@@ -108,8 +107,8 @@ public class Indexer extends Configured implements Tool {
 		}
 
 	}
-
-	public class PandaRecordReader extends RecordReader<Text, Text> {
+	
+	public static class PandaRecordReader extends RecordReader<Text, Text> {
 
 		TrecDoc td;
 		Text key;
@@ -142,20 +141,16 @@ public class Indexer extends Configured implements Tool {
 			FileSplit fileSplit = (FileSplit) arg0;
 			Path path = fileSplit.getPath();
 
-			// set up key and value
 			key = new Text();
 			value = new Text();
-
-			filename = path.getName();
-
-			td = new TrecDoc();
-
-			// set the conf
+			
+			filename = path.toString();
+			td = new TrecDoc(filename);
 			Properties props = new Properties();
+			props.setProperty("doc.maker.forever", "false");
 			Config conf = new Config(props);
 			td.setConfig(conf);
 
-			// set the parser
 			HTMLParser htmlParser = (HTMLParser) new DemoHTMLParser();
 			td.setHTMLParser(htmlParser);
 		}
@@ -171,10 +166,9 @@ public class Indexer extends Configured implements Tool {
 			if (doc == null) {
 				return false;
 			}
-
 			// get the document name and the terms
-			Field docNoField = doc.getField(DOCIDFIELDNAME);
-			Field termVectorField = doc.getField(TERMVECTORFIELDNAME);
+			Field docNoField = doc.getField(Indexer.DOCIDFIELDNAME);
+			Field termVectorField = doc.getField(Indexer.TERMVECTORFIELDNAME);
 			String docNo = docNoField.stringValue();
 			String termVector = termVectorField.stringValue();
 
@@ -184,15 +178,14 @@ public class Indexer extends Configured implements Tool {
 
 			return true;
 		}
-
 	}
-
+	
 	@Override
 	public int run(String[] args) throws Exception {
 		Path in = new Path(args[0]);
 		Path out = new Path(args[1]);
 
-		Job job = new Job(getConf());
+		Job job = Job.getInstance();
 		job.setInputFormatClass(PandaInputFormat.class);
 
 		PandaInputFormat.setInputPaths(job, in);
@@ -208,6 +201,8 @@ public class Indexer extends Configured implements Tool {
 		job.setMapperClass(WordMapper.class);
 		job.setReducerClass(SumReducer.class);
 
+		job.setJarByClass(Indexer.class);
+		
 		FileSystem.get(out.toUri(), job.getConfiguration()).delete(out, true);
 
 		job.waitForCompletion(true);
