@@ -1,0 +1,36 @@
+<project name="Panda" default="dist" basedir=".">
+    <description>
+        Build file for Panda IRDM.
+    </description>
+
+  <property name="src" location="src"/>
+  <property name="lib" location="lib"/>
+  <property name="build" location="build"/>
+  <property name="dist"  location="."/>
+
+    <path id="build.classpath">
+        <fileset dir="${lib}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init" description="compile the source " >
+      <javac srcdir="${src}" destdir="${build}" classpathref="build.classpath"/>
+  </target>
+
+  <target name="dist" depends="compile" description="generate the distribution" >
+    <jar jarfile="${dist}/panda.jar" basedir="${build}">
+        <zipgroupfileset dir="${lib}" includes="**/*.jar" />
+    </jar>
+  </target>
+
+  <target name="clean" description="clean up" >
+    <delete dir="${build}"/>
+    <delete dir="${dist}/panda.jar"/>
+  </target>
+</project>
