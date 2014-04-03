@@ -30,7 +30,7 @@ public class PairOfStringInt implements Writable {
 	}
 
 	@Override
-	public void write(DataOutput out) throws IOException {
+	public void write(DataOutput out) throws IOException {	
 		leftElement.write(out);
 		rightElement.write(out);
 	}
@@ -51,4 +51,7 @@ public class PairOfStringInt implements Writable {
 		this.rightElement = rightElement;
 	}
 
+	public String toString() {
+		return leftElement.toString() + ":" + rightElement.toString();
+	}
 }
