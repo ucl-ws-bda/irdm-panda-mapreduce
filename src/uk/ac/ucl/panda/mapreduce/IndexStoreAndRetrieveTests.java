@@ -2,16 +2,14 @@ package uk.ac.ucl.panda.mapreduce;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.apache.hadoop.io.ArrayWritable;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Writable;
@@ -21,7 +19,6 @@ import org.junit.Test;
 import com.google.common.io.Files;
 
 import uk.ac.ucl.panda.mapreduce.io.Index;
-import uk.ac.ucl.panda.mapreduce.io.FrequencyLocationsPair;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
 
 
@@ -45,27 +42,17 @@ public class IndexStoreAndRetrieveTests extends TestCase {
 		posting.setCollectionTermFrequency(new LongWritable(randomGenerator.nextLong()));
 		posting.setDocumentFrequency(new LongWritable(randomGenerator.nextLong()));
 		for (int i = 0; i < randomGenerator.nextInt(10); i++) {
-			posting.addObservation(new LongWritable(randomGenerator.nextLong()),
-								   new LongWritable(randomGenerator.nextLong()),
-				                   createLocations()
+			posting.addObservation(new Text("Random" + randomGenerator.nextLong()),
+								   new IntWritable(randomGenerator.nextInt())
 			);
 		}
 		return posting;		
 	}
-	
-	private ArrayWritable createLocations() {
-		int num_locs = randomGenerator.nextInt(10);
-		LongWritable[] locations = new LongWritable[num_locs];
-		for (int i = 0; i < num_locs; i++) {
-			locations[i] = new LongWritable(randomGenerator.nextLong());
-		}
-		return new ArrayWritable(LongWritable.class, locations);
-	}
-	
+		
 	@Test
 	public void testStoreAndRetrievePosting() throws IOException {
-		Index.writeIndex(index, testDirectory);
-		Map<Text, PostingWritable> fetchedIndex = Index.readIndex(testDirectory);
+		Index.writeIndex(index, new Path(testDirectory.getPath()));
+		Map<Text, PostingWritable> fetchedIndex = Index.readIndex(new Path(testDirectory.getPath(), Index.indexDir));
 		
 		for (Text key: index.keySet()) {
 			PostingWritable a = index.get(key);
@@ -79,26 +66,17 @@ public class IndexStoreAndRetrieveTests extends TestCase {
 			MapWritable aObs = a.getObservations();
 			MapWritable bObs = b.getObservations();
 			for (Writable docId: aObs.keySet()) {				
-				assertTrue(bObs.containsKey(docId));
-				
-				FrequencyLocationsPair ap = (FrequencyLocationsPair)aObs.get(docId);
-				FrequencyLocationsPair bp = (FrequencyLocationsPair)aObs.get(docId);
-				
-				assertEquals(ap.getTermFrequency(), bp.getTermFrequency());
-				
-				Set<String> aLocs = new HashSet<String>();
-				Collections.addAll(aLocs, ap.getLocations().toStrings());
-				Set<String> bLocs = new HashSet<String>();
-				Collections.addAll(bLocs, bp.getLocations().toStrings());
-				assertTrue(aLocs.containsAll(bLocs));
-				assertTrue(bLocs.containsAll(aLocs));
+				assertTrue(bObs.containsKey(docId));				
+				int atf = ((IntWritable)aObs.get(docId)).get();
+				int btf = ((IntWritable)bObs.get(docId)).get();				
+				assertEquals(atf, btf);
 			}
 		}
 	}
 	
 	@Test
 	public void testStoreAndRetrievePostingOneByOne() throws IOException {
-		Index.writeIndex(index, testDirectory);
+		Index.writeIndex(index, new Path(testDirectory.getPath()));
 		
 		for (Text key: index.keySet()) {
 			PostingWritable a = index.get(key);
@@ -112,18 +90,8 @@ public class IndexStoreAndRetrieveTests extends TestCase {
 			MapWritable bObs = b.getObservations();
 			for (Writable docId: aObs.keySet()) {				
 				assertTrue(bObs.containsKey(docId));
-				
-				FrequencyLocationsPair ap = (FrequencyLocationsPair)aObs.get(docId);
-				FrequencyLocationsPair bp = (FrequencyLocationsPair)aObs.get(docId);
-				
-				assertEquals(ap.getTermFrequency(), bp.getTermFrequency());
-				
-				Set<String> aLocs = new HashSet<String>();
-				Collections.addAll(aLocs, ap.getLocations().toStrings());
-				Set<String> bLocs = new HashSet<String>();
-				Collections.addAll(bLocs, bp.getLocations().toStrings());
-				assertTrue(aLocs.containsAll(bLocs));
-				assertTrue(bLocs.containsAll(aLocs));
+				assertEquals(a.getCollectionTermFrequency(), b.getCollectionTermFrequency());
+				assertEquals(a.getDocumentFrequency(), b.getDocumentFrequency());
 			}
 		}
 	}

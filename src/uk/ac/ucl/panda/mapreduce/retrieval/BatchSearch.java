@@ -15,6 +15,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
@@ -29,7 +30,6 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
 
-import uk.ac.ucl.panda.mapreduce.io.FrequencyLocationsPair;
 import uk.ac.ucl.panda.mapreduce.io.Index;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
 import uk.ac.ucl.panda.mapreduce.io.ScoreDocPair;
@@ -72,8 +72,7 @@ public class BatchSearch extends Configured implements Tool {
 				// We add 1 to df to avoid zero-division. This is common practice.
 				double idf = Math.log(docNum / (1 + df));
 				for (Writable docId: observations.keySet()) {
-					FrequencyLocationsPair flp = (FrequencyLocationsPair)observations.get(docId);
-					double tf = flp.getTermFrequency().get();
+					int tf = ((IntWritable)observations.get(docId)).get();
 					double dl = Index.fetchDocumentLength(indexDir, (LongWritable)docId).get();
 					double score = model.getscore(tf, df, idf, dl, avgDL, docNum, cl, ctf, qtf);
 					if (scores.containsKey(docId)) {

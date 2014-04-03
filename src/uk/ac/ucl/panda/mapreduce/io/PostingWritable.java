@@ -4,9 +4,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.ArrayWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
 public class PostingWritable implements Writable {
@@ -25,8 +26,8 @@ public class PostingWritable implements Writable {
 		observations = new MapWritable();
 	}
 	
-	public void addObservation(LongWritable docId, LongWritable termFrequency, ArrayWritable locations) {
-		observations.put(docId, new FrequencyLocationsPair(termFrequency, locations));
+	public void addObservation(Text docId, IntWritable termFrequency) {
+		observations.put(docId, termFrequency);
 	}
 	
 	@Override

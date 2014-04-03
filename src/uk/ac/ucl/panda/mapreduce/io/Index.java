@@ -21,11 +21,10 @@ public class Index {
 	public static final String docIndexDir = "docIndex";
 	public static final String indexDir = "index";
 	
-	public static Map<Text, PostingWritable> readIndex(File directory) throws IOException {
-		Map<Text, PostingWritable> index = new HashMap<Text, PostingWritable>();				
-		Path p = new Path(directory.getAbsolutePath(), indexDir);
+	public static Map<Text, PostingWritable> readIndex(Path path) throws IOException {
+		Map<Text, PostingWritable> index = new HashMap<Text, PostingWritable>();	
 		Configuration conf = new Configuration();			
-		MapFile.Reader reader = new MapFile.Reader(p, conf);
+		MapFile.Reader reader = new MapFile.Reader(path, conf);
 		Text key = new Text();
 		PostingWritable posting = new PostingWritable();
 		while (reader.next(key, posting)) {
@@ -37,9 +36,9 @@ public class Index {
 		return index;
 	}
 	
-	public static void writeIndex(Map<Text, PostingWritable> index, File outputFile) throws IOException {
+	public static void writeIndex(Map<Text, PostingWritable> index, Path path) throws IOException {
 		Configuration conf = new Configuration();
-		Path p = new Path(outputFile.getAbsolutePath(), indexDir);
+		Path p = new Path(path, indexDir);
 		MapFile.Writer writer = new MapFile.Writer(conf, p, 
 				MapFile.Writer.keyClass(Text.class),
 				MapFile.Writer.valueClass(PostingWritable.class)

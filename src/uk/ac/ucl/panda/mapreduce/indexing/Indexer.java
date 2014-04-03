@@ -9,7 +9,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -31,10 +30,9 @@ import org.apache.hadoop.util.ToolRunner;
 
 import uk.ac.ucl.panda.applications.demo.DemoHTMLParser;
 import uk.ac.ucl.panda.indexing.io.TrecDoc;
-import uk.ac.ucl.panda.mapreduce.io.ArrayListWritable;
 import uk.ac.ucl.panda.mapreduce.io.Index;
 import uk.ac.ucl.panda.mapreduce.io.PairOfStringInt;
-import uk.ac.ucl.panda.mapreduce.io.PairOfWritables;
+import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
 import uk.ac.ucl.panda.mapreduce.util.ObjectFrequencyDistribution;
 import uk.ac.ucl.panda.mapreduce.util.Pair;
 import uk.ac.ucl.panda.utility.io.Config;
@@ -89,29 +87,24 @@ public class Indexer extends Configured implements Tool {
 	}
 
 
-	public static class SumReducer	extends	Reducer<Text, PairOfStringInt, Text, PairOfWritables<IntWritable, ArrayListWritable<PairOfStringInt>>> {
+	public static class SumReducer	extends	Reducer<Text, PairOfStringInt, Text, PostingWritable> {
 
-		private final IntWritable DF = new IntWritable();
-			
 		public void reduce(Text key, Iterable<PairOfStringInt> values,
 				Context context) throws IOException, InterruptedException {
-			ArrayListWritable<PairOfStringInt> postings = new ArrayListWritable<PairOfStringInt>();
-		
-			// get df
+			
+			PostingWritable posting = new PostingWritable();
+					
+			// Calculate document frequency and collection term frequency.
 			int df = 0;
-			for (PairOfStringInt posting : values) {
-				// TODO: is clone() necessary here?
-				postings.add(posting);
+			int ctf = 0;
+			for (PairOfStringInt observation : values) {
+				posting.addObservation(observation.getLeftElement(), observation.getRightElement());
+				ctf += observation.getRightElement().get();
 				df++;
 			}
-			DF.set(df);
-			
-			// emit word, df, and postings
-			//context.write(
-			context.write(
-					key,
-					new PairOfWritables<IntWritable, ArrayListWritable<PairOfStringInt>>(
-							DF, postings));
+			posting.setDocumentFrequency(new LongWritable(df));
+			posting.setCollectionTermFrequency(new LongWritable(ctf));			
+			context.write(key, posting);
 		}
 	}
 
@@ -220,7 +213,7 @@ public class Indexer extends Configured implements Tool {
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(PairOfStringInt.class);
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(PairOfWritables.class);
+		job.setOutputValueClass(PostingWritable.class);
 		
 		job.setMapperClass(WordMapper.class);
 		job.setReducerClass(SumReducer.class);
