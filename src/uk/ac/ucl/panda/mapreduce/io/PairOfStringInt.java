@@ -10,9 +10,14 @@ import org.apache.hadoop.io.Writable;
 
 public class PairOfStringInt implements Writable {
 
-	private Text leftElement;
-	private IntWritable rightElement;
+	private Text leftElement = new Text("<unset>");
+	private IntWritable rightElement = new IntWritable(0);
 
+	public PairOfStringInt() {
+		// The reflection based serialisation process requires no argument initialisers
+		// on all Writables.
+	}
+	
 	public PairOfStringInt(String left, Integer right) {
 		leftElement.set(left);
 		rightElement.set(right);
