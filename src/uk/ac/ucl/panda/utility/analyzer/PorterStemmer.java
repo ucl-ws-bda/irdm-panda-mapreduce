@@ -55,7 +55,7 @@ import java.io.*;
  * by calling one of the various stem(something) methods.
  */
 
-class PorterStemmer
+public class PorterStemmer
 {
   private char[] b;
   private int i,    /* offset into b */

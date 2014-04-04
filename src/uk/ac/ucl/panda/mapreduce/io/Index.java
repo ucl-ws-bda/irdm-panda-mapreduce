@@ -67,7 +67,7 @@ public class Index {
 		return posting;
 	}
 	
-	public static LongWritable fetchDocumentLength(String directory, LongWritable docId) throws IOException {
+	public static LongWritable fetchDocumentLength(String directory, Text docId) throws IOException {
 		Path p = new Path(directory, docIndexDir);
 		Configuration conf = new Configuration();			
 		MapFile.Reader reader = new MapFile.Reader(p, conf);
@@ -77,14 +77,14 @@ public class Index {
 		return dl;
 	}
 	
-	public static Map<String, Integer> readMetaIndex(File directory) throws IOException {
+	public static Map<String, Long> readMetaIndex(Path path) throws IOException {
 		// TODO: very similar to readIndex, consider refactor?
-		Map<String, Integer> metaIndex = new HashMap<String, Integer>();
-		Path p = new Path(directory.getAbsolutePath(), metaFile);
+		Map<String, Long> metaIndex = new HashMap<String, Long>();
+		Path p = new Path(path, metaFile);
 		Configuration conf = new Configuration();			
 		MapFile.Reader reader = new MapFile.Reader(p, conf);
 		Text key = new Text("unset");
-		IntWritable value = new IntWritable(0);
+		LongWritable value = new LongWritable(0);
 		while(reader.next(key, value)) {
 			metaIndex.put(key.toString(), value.get());
 		}

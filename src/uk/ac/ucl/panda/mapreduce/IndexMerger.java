@@ -83,7 +83,7 @@ public class IndexMerger {
 		if (args.length != 1) {
 			System.out.println("RTFM.");
 		}
-		mergeIndex(new Path(args[0]));
+		//mergeIndex(new Path(args[0]));
 		mergeDocumentIndex(new Path(args[0]));
 	}
 

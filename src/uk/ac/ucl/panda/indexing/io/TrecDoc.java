@@ -61,7 +61,7 @@ public class TrecDoc extends BasicDocMaker {
   
     collectFiles(dataDir, inputFiles);
     if (inputFiles.size()==0) {
-      throw new RuntimeException("No txt files in dataDir: " + dataDir);
+      throw new IOException("No txt files in dataDir: " + dataDir);
     }
  }
 
@@ -89,7 +89,7 @@ public class TrecDoc extends BasicDocMaker {
           nextFile = 0;
           iteration++;
         }
-        f = (File) inputFiles.get(nextFile++);
+        f = new File((String) inputFiles.get(nextFile++));
       }
       System.out.println("opening: "+f+" length: "+f.length());
       try {

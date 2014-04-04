@@ -328,7 +328,7 @@ public abstract class BasicDocMaker implements DocMaker {
       return;
     }
     if (fs.isDirectory(p)) {
-      RemoteIterator<LocatedFileStatus> fileIter = fs.listFiles(p, false);
+      RemoteIterator<LocatedFileStatus> fileIter = fs.listLocatedStatus(p);
       List<String> files = new ArrayList<String>();
       while(fileIter.hasNext()) {
     	  files.add(fileIter.next().getPath().toString());

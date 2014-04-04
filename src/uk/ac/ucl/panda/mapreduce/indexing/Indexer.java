@@ -33,6 +33,7 @@ import uk.ac.ucl.panda.indexing.io.TrecDoc;
 import uk.ac.ucl.panda.mapreduce.io.Index;
 import uk.ac.ucl.panda.mapreduce.io.PairOfStringInt;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
+import uk.ac.ucl.panda.mapreduce.io.Stemmer;
 import uk.ac.ucl.panda.mapreduce.util.ObjectFrequencyDistribution;
 import uk.ac.ucl.panda.mapreduce.util.Pair;
 import uk.ac.ucl.panda.utility.io.Config;
@@ -63,7 +64,7 @@ public class Indexer extends Configured implements Tool {
 
 			// get tf
 			while (terms.hasMoreTokens()) {
-				DISTRIBUTION.increment(terms.nextToken());
+				DISTRIBUTION.increment(Stemmer.stem(terms.nextToken()));
 			}
 
 			long numTerms = 0;
@@ -152,7 +153,7 @@ public class Indexer extends Configured implements Tool {
 		}
 
 		@Override
-		public void initialize(InputSplit arg0, TaskAttemptContext arg1)
+		public void initialize(InputSplit arg0, TaskAttemptContext context)
 				throws IOException, InterruptedException {
 			FileSplit fileSplit = (FileSplit) arg0;
 			Path path = fileSplit.getPath();
@@ -165,14 +166,27 @@ public class Indexer extends Configured implements Tool {
 			Properties props = new Properties();
 			props.setProperty("doc.maker.forever", "false");
 			Config conf = new Config(props);
-			td.setConfig(conf);
-
-			HTMLParser htmlParser = (HTMLParser) new DemoHTMLParser();
-			td.setHTMLParser(htmlParser);
+			try {
+				td.setConfig(conf);
+				HTMLParser htmlParser = (HTMLParser) new DemoHTMLParser();
+				td.setHTMLParser(htmlParser);
+				context.getCounter(IndexMeta.IndexedFiles).increment(1);
+			} catch (IOException e) {
+				// Trying to read a non-indexable archive. Ignore
+				context.getCounter(IndexMeta.IgnoredFiles).increment(1);
+				// Flags nextKeyValue to not try and output anything
+				filename = null;
+			}
+			context.getCounter(IndexMeta.NumberOfFiles).increment(1);
 		}
 
 		@Override
 		public boolean nextKeyValue() throws IOException, InterruptedException {
+			// Not a valid index file. Ignore.
+			if (filename == null) {
+				return false;
+			}
+			
 			Document doc = null;
 			try {
 				doc = td.makeDocument(filename);
@@ -202,9 +216,12 @@ public class Indexer extends Configured implements Tool {
 		Path out = new Path(args[1]);
 
 		Job job = Job.getInstance();
+		job.setJobName("Indexing");
+		
 		job.setInputFormatClass(PandaInputFormat.class);
-
+		
 		PandaInputFormat.setInputPaths(job, in);
+		PandaInputFormat.setInputDirRecursive(job, true);
 		FileOutputFormat.setOutputPath(job, out);
 
 		job.setOutputFormatClass(MapFileOutputFormat.class);
@@ -231,9 +248,11 @@ public class Indexer extends Configured implements Tool {
 		
 		long numberOfDocuments = job.getCounters().findCounter(IndexMeta.NumberOfDocuments).getValue();
 		long collectionLength = job.getCounters().findCounter(IndexMeta.CollectionLength).getValue();
+		long ignoredFiles = job.getCounters().findCounter(IndexMeta.IgnoredFiles).getValue();
 		Index.writeMetaIndex(collectionLength, numberOfDocuments, out);
 		System.out.println("Documents processed: " + numberOfDocuments);
 		System.out.println("Collection length: " + collectionLength);
+		System.out.println("Ignored files: " + ignoredFiles);
 		return 0;
 	}
 

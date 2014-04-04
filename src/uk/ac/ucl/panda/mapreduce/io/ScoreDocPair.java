@@ -5,19 +5,19 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
 public class ScoreDocPair implements WritableComparable<ScoreDocPair> {
 
-	private LongWritable docId;
+	private Text docId;
 	private DoubleWritable score;
 	
 	public ScoreDocPair() {
-		this(new LongWritable(0), new DoubleWritable(0));
+		this(new Text("<unset>"), new DoubleWritable(0));
 	}
 	
-	public ScoreDocPair(LongWritable docId, DoubleWritable score) {
+	public ScoreDocPair(Text docId, DoubleWritable score) {
 		this.docId = docId;
 		this.score = score;
 	}
@@ -34,11 +34,11 @@ public class ScoreDocPair implements WritableComparable<ScoreDocPair> {
 		score.readFields(in);
 	}
 
-	public LongWritable getDocId() {
+	public Text getDocId() {
 		return docId;
 	}
 
-	public void setDocId(LongWritable docId) {
+	public void setDocId(Text docId) {
 		this.docId = docId;
 	}
 
