@@ -27,7 +27,7 @@ public class PostingWritable implements Writable {
 	}
 	
 	public void addObservation(Text docId, IntWritable termFrequency) {
-		observations.put(docId, termFrequency);
+		observations.put(new Text(docId.toString()), new IntWritable(termFrequency.get()));
 	}
 	
 	@Override

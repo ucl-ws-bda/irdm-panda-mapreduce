@@ -27,6 +27,7 @@ import uk.ac.ucl.panda.map.ResultsList.Result;
 import uk.ac.ucl.panda.mapreduce.io.Index;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
 import uk.ac.ucl.panda.mapreduce.io.ScoreDocPair;
+import uk.ac.ucl.panda.mapreduce.io.Stemmer;
 import uk.ac.ucl.panda.utility.analyzer.PorterStemmer;
 
 public class RetrievalEvaluator {
@@ -62,8 +63,8 @@ public class RetrievalEvaluator {
 		Configuration conf = new Configuration();		
 		while (fileIter.hasNext()) {
 			LocatedFileStatus f = fileIter.next();
-			if (f.isFile() && f.getPath().getName().startsWith("part-r-")) {	
-				System.out.println("Reading partial results file " + f.getPath().getName());
+			if (f.isFile()) {	
+				System.out.println("Reading results file " + f.getPath().getName());
 				SequenceFile.Reader reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(f.getPath()));
 				while (reader.next(key, results)) {
 					resultsIndex.put(key.get(), results);
@@ -81,17 +82,14 @@ public class RetrievalEvaluator {
 			System.out.println("Usage: retrievalResultsDir.");
 			System.exit(-1);
 		}
-		PostingWritable posting = Index.fetchPosting("/home/ib/irdm/index_backup/index/", "GERMAN");
+		/**
+		PostingWritable posting = Index.fetchPosting("/home/ib/irdm/index_test/out/", Stemmer.stem("Mining"));
 		System.out.println("CTF: " + posting.getCollectionTermFrequency());
 		System.out.println("DF: " + posting.getDocumentFrequency());
-		PorterStemmer ps = new PorterStemmer();
-		System.out.println(ps.stem("Germany".toLowerCase()));
 		for (Writable docId: posting.getObservations().keySet()) {
 			System.out.println(docId);
 		}
-	}
-		
-	public void e(String[] args) throws IllegalArgumentException, IOException, ClassNotFoundException {
+		 **/
 		Map<Long, ArrayWritable> resultsIndex = readResults(new Path(args[0]));
 		Map<Long, List<Result>> pandaResultsIndex = readPandaResults();
 		
