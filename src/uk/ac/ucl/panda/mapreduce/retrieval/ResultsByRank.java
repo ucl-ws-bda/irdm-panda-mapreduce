@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Reducer.Context;
 
 import uk.ac.ucl.panda.mapreduce.io.ScoreDocPair;
 

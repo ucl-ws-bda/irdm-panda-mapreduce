@@ -3,9 +3,10 @@ package uk.ac.ucl.panda.mapreduce;
 import java.io.File;
 import java.io.IOException;
 
+import junit.framework.TestCase;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -15,8 +16,6 @@ import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl;
 import org.junit.Test;
 
 import uk.ac.ucl.panda.mapreduce.indexing.PandaInputFormat;
-
-import junit.framework.TestCase;
 
 public class ArchiveRecordReaderTest extends TestCase {
 
