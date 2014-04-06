@@ -16,12 +16,15 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.MapFile;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.log4j.Logger;
 
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
 import uk.ac.ucl.panda.mapreduce.util.Index;
 
 
 public class IndexMerger {
+
+	private static Logger logger = Logger.getLogger(IndexMerger.class);
 
 	/**
 	 * Merge a series of document length index sequence files into one mapfile.
@@ -36,7 +39,7 @@ public class IndexMerger {
 		while (fileIter.hasNext()) {
 			LocatedFileStatus f = fileIter.next();
 			if (f.isFile() && f.getPath().getName().startsWith(Index.docIndexDir + "-")) {	
-				System.out.println("Merging partial doc length index " + f.getPath().getName());
+				logger.info("Merging partial doc length index " + f.getPath().getName());
 				SequenceFile.Reader reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(f.getPath()));
 				while (reader.next(key, docLength)) {
 					index.put(key, docLength);
@@ -71,7 +74,7 @@ public class IndexMerger {
 		while (fileIter.hasNext()) {
 			LocatedFileStatus f = fileIter.next();			
 			if (f.isDirectory() && f.getPath().getName().startsWith("part-r-0")) {	
-				System.out.println("Merging partial index " + f.getPath().getName());
+				logger.info("Merging partial index " + f.getPath().getName());
 				index.putAll(Index.readIndex(f.getPath()));
 			}
 		}		

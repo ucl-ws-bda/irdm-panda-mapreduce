@@ -15,12 +15,15 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.log4j.Logger;
 
 import uk.ac.ucl.panda.mapreduce.io.PairOfStringInt;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
 import uk.ac.ucl.panda.mapreduce.util.Index;
 
 public class Indexer extends Configured implements Tool {
+
+	private static Logger logger = Logger.getLogger(Indexer.class);
 
 	static final String DOCIDFIELDNAME = "docname";
 	static final String TERMVECTORFIELDNAME = "body";
@@ -61,8 +64,8 @@ public class Indexer extends Configured implements Tool {
 		long numberOfDocuments = job.getCounters().findCounter(IndexMeta.NumberOfDocuments).getValue();
 		long collectionLength = job.getCounters().findCounter(IndexMeta.CollectionLength).getValue();
 		Index.writeMetaIndex(collectionLength, numberOfDocuments, out);
-		System.out.println("Documents processed: " + numberOfDocuments);
-		System.out.println("Collection length: " + collectionLength);
+		logger.info("Documents processed: " + numberOfDocuments);
+		logger.info("Collection length: " + collectionLength);
 		return 0;
 	}
 

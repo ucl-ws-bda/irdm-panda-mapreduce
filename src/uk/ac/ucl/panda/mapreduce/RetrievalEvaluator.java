@@ -19,6 +19,7 @@ import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
+import org.apache.log4j.Logger;
 
 import uk.ac.ucl.panda.map.MAPScore;
 import uk.ac.ucl.panda.map.ResultsList;
@@ -27,6 +28,8 @@ import uk.ac.ucl.panda.mapreduce.io.ScoreDocPair;
 
 public class RetrievalEvaluator {
 	
+	private static Logger logger = Logger.getLogger(RetrievalEvaluator.class);
+
 	public static Map<Long, List<Result>> readPandaResults() throws ClassNotFoundException, IOException {
 		ResultsList results = MAPScore.getResultsFromFile();
 				
@@ -58,7 +61,7 @@ public class RetrievalEvaluator {
 		while (fileIter.hasNext()) {
 			LocatedFileStatus f = fileIter.next();
 			if (f.isFile()) {	
-				System.out.println("Reading results file " + f.getPath().getName());
+				logger.info("Reading results file " + f.getPath().getName());
 				SequenceFile.Reader reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(f.getPath()));
 				while (reader.next(key, results)) {
 					resultsIndex.put(key.get(), results);
