@@ -1,4 +1,4 @@
-package uk.ac.ucl.panda.mapreduce;
+package uk.ac.ucl.panda.mapreduce.indexing;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,8 +17,8 @@ import org.apache.hadoop.io.MapFile;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 
-import uk.ac.ucl.panda.mapreduce.io.Index;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
+import uk.ac.ucl.panda.mapreduce.util.Index;
 
 
 public class IndexMerger {

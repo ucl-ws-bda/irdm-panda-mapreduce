@@ -1,4 +1,4 @@
-package uk.ac.ucl.panda.mapreduce.io;
+package uk.ac.ucl.panda.mapreduce.util;
 
 import uk.ac.ucl.panda.utility.analyzer.PorterStemmer;
 

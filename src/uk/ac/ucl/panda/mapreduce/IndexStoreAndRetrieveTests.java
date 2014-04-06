@@ -18,8 +18,8 @@ import org.junit.Test;
 
 import com.google.common.io.Files;
 
-import uk.ac.ucl.panda.mapreduce.io.Index;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
+import uk.ac.ucl.panda.mapreduce.util.Index;
 
 
 public class IndexStoreAndRetrieveTests extends TestCase {

@@ -1,4 +1,4 @@
-package uk.ac.ucl.panda.mapreduce.io;
+package uk.ac.ucl.panda.mapreduce.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +14,8 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.MapFile;
 import org.apache.hadoop.io.Text;
+
+import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
 
 public class Index {
 	

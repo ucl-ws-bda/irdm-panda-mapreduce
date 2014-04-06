@@ -24,10 +24,10 @@ import uk.ac.ucl.panda.GetDocTermStats;
 import uk.ac.ucl.panda.map.MAPScore;
 import uk.ac.ucl.panda.map.ResultsList;
 import uk.ac.ucl.panda.map.ResultsList.Result;
-import uk.ac.ucl.panda.mapreduce.io.Index;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
 import uk.ac.ucl.panda.mapreduce.io.ScoreDocPair;
-import uk.ac.ucl.panda.mapreduce.io.Stemmer;
+import uk.ac.ucl.panda.mapreduce.util.Index;
+import uk.ac.ucl.panda.mapreduce.util.Stemmer;
 import uk.ac.ucl.panda.utility.analyzer.PorterStemmer;
 
 public class RetrievalEvaluator {
