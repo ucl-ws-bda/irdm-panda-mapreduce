@@ -20,7 +20,6 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 
-import uk.ac.ucl.panda.GetDocTermStats;
 import uk.ac.ucl.panda.map.MAPScore;
 import uk.ac.ucl.panda.map.ResultsList;
 import uk.ac.ucl.panda.map.ResultsList.Result;
@@ -30,7 +29,6 @@ public class RetrievalEvaluator {
 	
 	public static Map<Long, List<Result>> readPandaResults() throws ClassNotFoundException, IOException {
 		ResultsList results = MAPScore.getResultsFromFile();
-		GetDocTermStats gtdcs = new GetDocTermStats();
 				
 		Comparator<Result> sortByRank = new Comparator<Result>() {
 	        @Override

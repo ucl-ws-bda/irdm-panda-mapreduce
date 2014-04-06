@@ -21,7 +21,6 @@ import uk.ac.ucl.panda.retrieval.query.QualityQuery;
 public class TopicRecordReader extends RecordReader<LongWritable, Text> {
 	private QualityQuery qqs[];
 	private BufferedReader br;
-	private TrecTopicsReader qReader;
 	private LongWritable key;
 	private Text value;
 	private int progress = 0;
