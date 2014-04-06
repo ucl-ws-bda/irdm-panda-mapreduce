@@ -13,7 +13,7 @@ import uk.ac.ucl.panda.mapreduce.util.Index;
 import uk.ac.ucl.panda.mapreduce.util.ObjectFrequencyDistribution;
 import uk.ac.ucl.panda.mapreduce.util.Pair;
 
-public class WordMapper extends Mapper<Text, Text, Text, PairOfStringInt> {
+public class IndexMapper extends Mapper<Text, Text, Text, PairOfStringInt> {
 	private final Text WORD = new Text();
 	private final ObjectFrequencyDistribution<String> DISTRIBUTION = new ObjectFrequencyDistribution<String>();
 

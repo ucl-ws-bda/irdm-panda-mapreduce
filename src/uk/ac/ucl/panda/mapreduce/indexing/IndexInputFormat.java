@@ -10,7 +10,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
-public class PandaInputFormat extends FileInputFormat<Text, Text> {
+public class IndexInputFormat extends FileInputFormat<Text, Text> {
 
 	@Override
 	protected boolean isSplitable(JobContext context, Path filename) {
@@ -21,7 +21,7 @@ public class PandaInputFormat extends FileInputFormat<Text, Text> {
 	public RecordReader<Text, Text> createRecordReader(InputSplit arg0,
 			TaskAttemptContext arg1) throws IOException,
 			InterruptedException {
-		return new PandaRecordReader();
+		return new IndexRecordReader();
 	}
 
 }

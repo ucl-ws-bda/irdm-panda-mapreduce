@@ -15,7 +15,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl;
 import org.junit.Test;
 
-import uk.ac.ucl.panda.mapreduce.indexing.PandaInputFormat;
+import uk.ac.ucl.panda.mapreduce.indexing.IndexInputFormat;
 
 public class ArchiveRecordReaderTest extends TestCase {
 
@@ -29,7 +29,7 @@ public class ArchiveRecordReaderTest extends TestCase {
 		FileSplit split = new FileSplit(
 		       new Path(testFile.toURI()), 0, 
 		       (long)testFile.length(), null); 
-		PandaInputFormat inputFormat = new PandaInputFormat();
+		IndexInputFormat inputFormat = new IndexInputFormat();
 		TaskAttemptContext context = new TaskAttemptContextImpl(conf, new TaskAttemptID());
 		RecordReader<Text, Text> reader = inputFormat.createRecordReader(split, context);
 		reader.initialize(split, context);

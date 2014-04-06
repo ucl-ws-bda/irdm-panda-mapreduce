@@ -17,7 +17,7 @@ import uk.ac.ucl.panda.utility.parser.HTMLParser;
 import uk.ac.ucl.panda.utility.structure.Document;
 import uk.ac.ucl.panda.utility.structure.Field;
 
-public class PandaRecordReader extends RecordReader<Text, Text> {
+public class IndexRecordReader extends RecordReader<Text, Text> {
 
 	TrecDoc td;
 	Text key;

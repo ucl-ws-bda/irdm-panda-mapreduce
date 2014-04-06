@@ -34,9 +34,9 @@ public class Indexer extends Configured implements Tool {
 		Path out = new Path(args[1]);
 
 		Job job = Job.getInstance();
-		job.setInputFormatClass(PandaInputFormat.class);
+		job.setInputFormatClass(IndexInputFormat.class);
 
-		PandaInputFormat.setInputPaths(job, in);
+		IndexInputFormat.setInputPaths(job, in);
 		FileOutputFormat.setOutputPath(job, out);
 
 		job.setOutputFormatClass(MapFileOutputFormat.class);
@@ -47,8 +47,8 @@ public class Indexer extends Configured implements Tool {
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(PostingWritable.class);
 		
-		job.setMapperClass(WordMapper.class);
-		job.setReducerClass(SumReducer.class);
+		job.setMapperClass(IndexMapper.class);
+		job.setReducerClass(IndexReducer.class);
 
 		// Output in SequenceFile since docIds arrive out of order which is required
 		// for MapFiles. We will post-process merge these into a MapFile after indexing.

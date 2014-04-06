@@ -9,7 +9,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import uk.ac.ucl.panda.mapreduce.io.PairOfStringInt;
 import uk.ac.ucl.panda.mapreduce.io.PostingWritable;
 
-public class SumReducer	extends	Reducer<Text, PairOfStringInt, Text, PostingWritable> {
+public class IndexReducer	extends	Reducer<Text, PairOfStringInt, Text, PostingWritable> {
 
 	public void reduce(Text key, Iterable<PairOfStringInt> values,
 			Context context) throws IOException, InterruptedException {
